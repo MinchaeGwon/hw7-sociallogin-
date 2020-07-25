@@ -1,0 +1,153 @@
+{% load static %}
+{% load socialaccount %}
+{% providers_media_js %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=o3735ft2pv"></script>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+
+    <style>
+        @font-face { font-family: 'DWImpactamin';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.0/DWImpactamin.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face { font-family: 'JSDongkang-Regular';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/JSDongkang-RegularA1.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face { font-family: 'Handon3gyeopsal300g';
+          src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_seven@1.2/Handon3gyeopsal300g.woff') format('woff');
+          font-weight: normal;
+          font-style: normal;
+        }
+
+        #pos {
+          position: absolute;
+          right: 20px;
+          top: 14px;
+          font-size: 20px;
+        }
+        h2 {
+            font-family: 'Handon3gyeopsal300g';
+            font-weight: bold;
+        }
+        .font {
+            font-family: 'JSDongkang-Regular';
+        }
+        #td {
+            border-bottom: 3px dashed #F3D2E9;
+            text-align: center;
+            padding-right: 5px;
+            padding-top: 12px;
+        }
+        .color {
+            padding-top: 20px;
+            background-color: #FBFBF7;
+            width: 100%;
+            height: 100%;
+        }
+        #map {
+            width:300px;
+            height:300px; 
+            float: left;
+            margin-left: 34px;
+        }
+        #d {
+            margin-top: 30px;
+            width: 730px;
+            border: 4px solid #F4D7FB;
+            border-radius: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color:#F6D2D2; font-family: 'DWImpactamin';">
+        <a class="navbar-brand">Blog</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+      
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                {% if user.is_authenticated %}
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'newblog' %}">Write</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts/logout">로그아웃</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'main' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts/signup">Sign up</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% provider_login_url 'google' %}">구글 로그인</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% provider_login_url 'naver' %}">네이버 로그인</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+        <p id="pos">🥞맛집 추천 블로그🍳</p>
+    </nav>
+
+    <div align="center" class="color">
+        <div id="d">
+            <table width="700">
+                <tr>
+                    <td id="td">
+                        <h2>{{blog.title}}</h2>
+                        <p class="font" style="float: right; font-size: 12px; color: #818699; margin-right: 10px;">{{blog.pub_date}}</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="font">
+                        <div align="center">
+                            <br>
+                            <div id="map"></div>
+                            <img src="{{blog.image.url}}" height=300 width=300>
+                        </div>
+                        
+                        <script>
+                            var map = new naver.maps.Map('map', {
+                            center: new naver.maps.LatLng(37.654527,127.060551),
+                            zoom: 16
+                            });
+
+                            var marker = new naver.maps.Marker({
+                                position: new naver.maps.LatLng(37.654527,127.060551),
+                                map: map
+                            });
+                        </script>
+                        
+                        <br>
+                        <p style="margin-left: 20px; margin-right: 20px; font-size: 19px;">{{blog.body}}</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <br>
+
+        <a href="{% url 'update' blog.id %}" style="margin-right: 20px;"><img src="{% static 'fix.png' %}"></a>
+        <a href="{% url 'delete' blog.id %}"><img src="{% static 'delete.png' %}"></a>
+    </div>
+</body>

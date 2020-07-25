@@ -1,0 +1,162 @@
+{% load static %}
+{% load socialaccount %}
+{% providers_media_js %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId=o3735ft2pv"></script>
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+
+    <style>
+        @font-face { font-family: 'DWImpactamin';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@1.0/DWImpactamin.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face { font-family: 'JSDongkang-Regular';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/JSDongkang-RegularA1.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        @font-face { font-family: 'Handon3gyeopsal300g';
+          src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_seven@1.2/Handon3gyeopsal300g.woff') format('woff');
+          font-weight: normal;
+          font-style: normal;
+        }
+
+        h1 {
+            margin-top: 70px;
+
+            font-family: 'Handon3gyeopsal300g';
+            font-weight: bold;
+        }
+        #pos {
+          position: absolute;
+          right: 20px;
+          top: 14px;
+          font-size: 20px;
+        }
+        .color {
+            padding-top: 20px;
+            background-color: #FBFBF7;
+            width: 100%;
+            height: 100%;
+        }
+        #line {
+            width:1000px;
+            margin-top: 50px;
+            margin-bottom: 40px;
+            margin-left: 19%;
+            border: 3px solid #F7DFF9;
+            border-radius: 20px;
+            font-family: 'Handon3gyeopsal300g';
+        }
+        #map {
+            width:300px;
+            height:97%; 
+            float: left;
+            margin-left: 20px;
+        }
+
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light" style="background-color:#F6D2D2; font-family: 'DWImpactamin';">
+        <a class="navbar-brand">Blog</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+      
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                {% if user.is_authenticated %}
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'home' %}">Home</a>
+                    </li>
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'newblog' %}">Write</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts/logout">로그아웃</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item active">
+                        <a class="nav-link" href="{% url 'main' %}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/accounts/signup">Sign up</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% provider_login_url 'google' %}">구글 로그인</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% provider_login_url 'naver' %}">네이버 로그인</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+        <p id="pos">🥞맛집 추천 블로그🍳</p>
+    </nav>
+    
+    <div align="center" class="color">
+        <div id="map"></div>
+        
+        <script>
+            var map = new naver.maps.Map('map', {
+            center: new naver.maps.LatLng(37.654527,127.060551),
+            zoom: 15
+            });
+
+            var marker1 = new naver.maps.Marker({
+                position: new naver.maps.LatLng(37.654527,127.060551),
+                map: map
+            });
+
+            var marker2 = new naver.maps.Marker({
+                position: new naver.maps.LatLng(37.665375,127.057614),
+                map: map
+            });
+        </script>
+
+        <h1>🌃노원 맛집 추천🚎</h1>
+        <div id="line">
+            <table>
+                <tr>
+                    {% for blog in posts %}
+                        <td style="padding-left: 20px; padding-right: 20px;">
+                            <br>
+                            <img src="{{blog.image_thumbnail.url}}">
+                            <h3 style="padding-top: 8px;">{{blog.title}}</h3>
+                            <p style="font-size: 12px; color: #818699;">{{blog.pub_date}}</p>
+                            {{blog.summary}}
+                            <a href="{% url 'detail' blog.id %}" style="float: right;">...more</a>
+                            <br><br>
+                        </td>
+                    {%endfor%}
+                </tr>
+            </table>
+        </div>
+        
+        {% if posts.has_previous %}
+            <a href="?page=1">First</a>
+            <a href="?page={{posts.previous_page_number}}">Previous</a>
+        {% endif %}
+        
+        <span>{{posts.number}}</span>
+        <span>of</span>
+        <span>{{posts.paginator.num_pages}}</span>
+                          
+        {% if posts.has_next %}
+            <a href="?page={{posts.next_page_number}}">Next</a>
+            <a href="?page={{posts.paginator.num_pages}}">Last</a>
+        {% endif %}
+    </div>
+</body>
